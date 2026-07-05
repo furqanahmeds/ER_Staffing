@@ -1,0 +1,50 @@
+{
+  "1": {
+    "wait_time_lognormal": {
+      "mu": 2.5649,
+      "sigma": 0.7,
+      "median_min": 13
+    },
+    "treatment_time_lognormal": {
+      "mu": 5.2983,
+      "sigma": 0.9,
+      "median_min": 200
+    }
+  },
+  "2": {
+    "wait_time_lognormal": {
+      "mu": 2.7726,
+      "sigma": 0.65,
+      "median_min": 16
+    },
+    "treatment_time_lognormal": {
+      "mu": 4.8675,
+      "sigma": 0.75,
+      "median_min": 130
+    }
+  },
+  "3": {
+    "wait_time_lognormal": {
+      "mu": 2.9957,
+      "sigma": 0.6,
+      "median_min": 20
+    },
+    "treatment_time_lognormal": {
+      "mu": 4.6052,
+      "sigma": 0.6,
+      "median_min": 100
+    }
+  },
+  "4": {
+    "wait_time_lognormal": {
+      "mu": 3.091,
+      "sigma": 0.55,
+      "median_min": 22
+    },
+    "treatment_time_lognormal": {
+      "mu": 4.4998,
+      "sigma": 0.5,
+      "median_min": 90
+    }
+  }
+}
