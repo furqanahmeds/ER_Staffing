@@ -1,9 +1,27 @@
 """
-Day 5 (fixed): Synthea generates each patient's full life history, so
-encounters span ~100+ years -- averaging total encounters over that whole
-span badly understates a realistic daily arrival rate. Fix: compute the
-rate using only the most recent 365 days of simulated time, which better
-approximates a "current state" snapshot of the population.
+Day 5 (final): Arrival rate decision.
+
+FINDING:
+Synthea's 5,000-patient population, even restricted to the most recent
+year, produces only ~2.24 arrivals/day -- unusably low, because Synthea
+generates each patient's full life history and 5,000 patients is a small
+population base relative to a real hospital's ED catchment area.
+
+DECISION:
+Same pattern as the Day 3 acuity-mix decision -- use an external,
+documented benchmark for the volume Synthea can't reliably provide:
+
+  - Target arrival rate: 150 patients/day, representing a mid-size ED.
+    Grounded in the national ED visit rate of 47 visits per 100 people/year
+    (NHAMCS 2022 national summary), scaled to a mid-size hospital
+    catchment population.
+  - Synthea's hour-of-day distribution is retained as-is -- this shape
+    (evening peaks, midday bump) is a real, usable pattern independent
+    of the population-size problem that affects the absolute rate.
+
+This is a documented scope decision: the simulation represents a
+mid-size ED scenario, not a specific real hospital's actual volume.
+State this plainly in the write-up's data caveats section.
 """
 
 import pandas as pd
@@ -12,40 +30,34 @@ import json
 ed = pd.read_csv("data/ed_encounters_with_acuity.csv")
 ed["START"] = pd.to_datetime(ed["START"])
 
-# ---- Restrict to the most recent year of simulated time ----
-most_recent = ed["START"].max()
-one_year_ago = most_recent - pd.Timedelta(days=365)
-recent = ed[ed["START"] >= one_year_ago].copy()
-
-print(f"Most recent encounter date: {most_recent.date()}")
-print(f"Encounters in most recent year: {len(recent)} (out of {len(ed)} total)")
-
-avg_arrivals_per_day = len(recent) / 365
-print(f"Average arrivals/day (recent year only): {avg_arrivals_per_day:.2f}")
-
-# ---- Hour-of-day distribution (use full dataset -- shape is stable
-#      regardless of time window, more data = smoother pattern) ----
+# ---- Hourly shape from Synthea (kept as-is, this part is valid) ----
 ed["hour"] = ed["START"].dt.hour
 hourly_counts = ed["hour"].value_counts().sort_index()
 hourly_fraction = (hourly_counts / hourly_counts.sum()).to_dict()
 
-# ---- Sanity flag ----
-# A population of 5,000 synthetic patients is far smaller than a real
-# hospital's ED catchment area, so this recent-year rate will likely
-# still be lower than a real mid-size ED (typically 100-200 arrivals/day).
-# Document this explicitly: this simulation reflects a small ED or a
-# scaled-down scenario, not a claim about a specific real hospital's
-# actual volume.
+# ---- Documented target volume (external benchmark, not from Synthea) ----
+TARGET_ARRIVALS_PER_DAY = 150
 
 arrival_config = {
-    "avg_arrivals_per_day": round(avg_arrivals_per_day, 2),
+    "avg_arrivals_per_day": TARGET_ARRIVALS_PER_DAY,
     "hourly_fraction": {str(h): round(hourly_fraction.get(h, 0), 4) for h in range(24)},
-    "note": "Rate computed from most recent 365 days of Synthea's 5000-patient "
-            "population. Small population size means this reflects a "
-            "small/scaled-down ED scenario, not a specific real hospital.",
+    "source": "Target volume (150/day) is a documented assumption representing "
+              "a mid-size ED, grounded in NHAMCS 2022 national ED visit rate "
+              "(47 per 100 people/year). Synthea's population was too small "
+              "(5000 patients, ~2.24 recent-year arrivals/day) to provide a "
+              "realistic absolute rate directly. Hourly distribution shape "
+              "is retained from Synthea as it remains valid independent of "
+              "population size.",
 }
 
 with open("data/arrival_rate.json", "w") as f:
     json.dump(arrival_config, f, indent=2)
+
+print(f"Target arrivals/day: {TARGET_ARRIVALS_PER_DAY}")
+print("\nHourly fraction distribution:")
+for h in range(24):
+    frac = hourly_fraction.get(h, 0)
+    approx_arrivals = frac * TARGET_ARRIVALS_PER_DAY
+    print(f"  {h:02d}:00  {frac:.4f}  (~{approx_arrivals:.1f} patients/hr)")
 
 print("\nSaved to data/arrival_rate.json")
