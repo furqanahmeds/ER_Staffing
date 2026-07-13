@@ -1,5 +1,5 @@
 {
-  "avg_arrivals_per_day": 0.32,
+  "avg_arrivals_per_day": 2.24,
   "hourly_fraction": {
     "0": 0.0468,
     "1": 0.0423,
@@ -25,5 +25,6 @@
     "21": 0.0403,
     "22": 0.0533,
     "23": 0.0488
-  }
+  },
+  "note": "Rate computed from most recent 365 days of Synthea's 5000-patient population. Small population size means this reflects a small/scaled-down ED scenario, not a specific real hospital."
 }
