@@ -1,5 +1,5 @@
 {
-  "avg_arrivals_per_day": 2.24,
+  "avg_arrivals_per_day": 150,
   "hourly_fraction": {
     "0": 0.0468,
     "1": 0.0423,
@@ -26,5 +26,5 @@
     "22": 0.0533,
     "23": 0.0488
   },
-  "note": "Rate computed from most recent 365 days of Synthea's 5000-patient population. Small population size means this reflects a small/scaled-down ED scenario, not a specific real hospital."
+  "source": "Target volume (150/day) is a documented assumption representing a mid-size ED, grounded in NHAMCS 2022 national ED visit rate (47 per 100 people/year). Synthea's population was too small (5000 patients, ~2.24 recent-year arrivals/day) to provide a realistic absolute rate directly. Hourly distribution shape is retained from Synthea as it remains valid independent of population size."
 }
