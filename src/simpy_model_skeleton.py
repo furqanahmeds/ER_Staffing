@@ -32,13 +32,27 @@ ACUITY_LEVELS = [int(k) for k in ARRIVAL_MIX.keys()]
 ACUITY_WEIGHTS = [ARRIVAL_MIX[str(a)] for a in ACUITY_LEVELS]
 
 # ---- Staffing configuration (the control variable, varied in Days 10-12) ----
+# Bay count sized from queuing math: avg bay-occupancy demand is ~12.7
+# concurrent bays at 150 arrivals/day (weighted-average NHAMCS treatment
+# time ~122 min); 16 targets ~80% utilization, a standard queuing design
+# margin rather than running at the edge of capacity.
 STAFFING = {
     "triage_nurses": 2,
-    "treatment_bays": 8,
-    "physicians": 3,
+    "treatment_bays": 16,
+    "physicians": 4,
 }
 
+# Physician "contact time" is a separate, shorter duration than full bay
+# occupancy -- a physician assesses/directs care, then the patient
+# continues occupying the bay for nursing care, tests, and monitoring
+# while the physician moves to the next patient. This is a documented
+# modeling assumption: NHAMCS's published "treatment time" reflects
+# total ED length of stay, not exclusive physician-contact time, and the
+# ratio here is estimated rather than directly observed in NHAMCS data.
+PHYSICIAN_CONTACT_FRACTION = 0.2  # physician holds ~20% of total treatment time
+
 SIM_DURATION_MIN = 60 * 24 * 7  # simulate one full week
+WARMUP_MIN = 60 * 24  # discard first day as transient/warm-up when computing stats
 
 
 class ERSystem:
@@ -68,22 +82,33 @@ def patient(env, patient_id, acuity, er: ERSystem, rng, results: list):
         record["triage_end"] = env.now
 
     # ---- Treatment bay (priority by acuity: lower number = seen first) ----
+    # Bay is held for the FULL treatment duration (NHAMCS-derived).
+    # Physician is only held for a shorter contact-time portion within
+    # that window, then freed to see other patients -- this reflects
+    # real ED workflow (nursing/monitoring continues after the
+    # physician's assessment) and keeps physician demand realistic.
     with er.treatment_bay.request(priority=acuity) as req:
         yield req
         record["bay_start"] = env.now
         record["wait_time_min"] = record["bay_start"] - record["triage_end"]
 
-        # ---- Physician ----
+        treat_params = SERVICE_TIMES[str(acuity)]["treatment_time_lognormal"]
+        treatment_min = max(5, rng.lognormal(
+            mean=treat_params["mu"], sigma=treat_params["sigma"]
+        ))
+        record["treatment_time_min"] = treatment_min
+        physician_contact_min = max(2, treatment_min * PHYSICIAN_CONTACT_FRACTION)
+
+        # ---- Physician (shorter contact time, held early in the bay stay) ----
         with er.physician.request() as phys_req:
             yield phys_req
             record["physician_start"] = env.now
+            yield env.timeout(physician_contact_min)
 
-            treat_params = SERVICE_TIMES[str(acuity)]["treatment_time_lognormal"]
-            treatment_min = max(5, rng.lognormal(
-                mean=treat_params["mu"], sigma=treat_params["sigma"]
-            ))
-            yield env.timeout(treatment_min)
-            record["treatment_time_min"] = treatment_min
+        # ---- Remainder of bay time (nursing care, monitoring, tests) ----
+        remaining_bay_min = treatment_min - physician_contact_min
+        if remaining_bay_min > 0:
+            yield env.timeout(remaining_bay_min)
 
     record["departure_time"] = env.now
     record["total_time_min"] = record["departure_time"] - arrival_time
@@ -131,16 +156,23 @@ def run_simulation(staffing=STAFFING, sim_duration=SIM_DURATION_MIN, seed=RANDOM
 if __name__ == "__main__":
     df = run_simulation()
 
-    print(f"Simulated {SIM_DURATION_MIN / (60*24):.0f} days, {len(df)} patients processed")
-    print(f"\n=== Summary statistics ===")
-    print(f"Average wait time (triage -> bay): {df['wait_time_min'].mean():.1f} min")
-    print(f"90th percentile wait time: {df['wait_time_min'].quantile(0.9):.1f} min")
-    print(f"Average total time in system: {df['total_time_min'].mean():.1f} min")
+    print(f"Simulated {SIM_DURATION_MIN / (60*24):.0f} days, {len(df)} patients completed their full journey")
 
-    print(f"\n=== Wait time by acuity level ===")
-    print(df.groupby("acuity")["wait_time_min"].agg(["mean", "median",
+    # ---- Exclude warm-up period: the system starts empty, so early
+    # patients see artificially short waits. Standard DES practice is to
+    # discard this transient period before computing steady-state stats. ----
+    steady_state = df[df["arrival_time"] >= WARMUP_MIN].copy()
+    print(f"Patients in steady-state window (excluding first day warm-up): {len(steady_state)}")
+
+    print(f"\n=== Summary statistics (steady-state) ===")
+    print(f"Average wait time (triage -> bay): {steady_state['wait_time_min'].mean():.1f} min")
+    print(f"90th percentile wait time: {steady_state['wait_time_min'].quantile(0.9):.1f} min")
+    print(f"Average total time in system: {steady_state['total_time_min'].mean():.1f} min")
+
+    print(f"\n=== Wait time by acuity level (steady-state) ===")
+    print(steady_state.groupby("acuity")["wait_time_min"].agg(["mean", "median",
           lambda x: x.quantile(0.9), "count"]).rename(
           columns={"<lambda_0>": "p90"}))
 
     df.to_csv("data/simulation_results_baseline.csv", index=False)
-    print("\nSaved to data/simulation_results_baseline.csv")
+    print("\nSaved full results (including warm-up) to data/simulation_results_baseline.csv")
