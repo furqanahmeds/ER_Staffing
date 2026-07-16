@@ -47,8 +47,8 @@ COST_WEIGHTS = {"triage_nurses": 1.5, "treatment_bays": 1.0, "physicians": 4.0}
 # a full 7-day simulation run.
 CANDIDATE_CONFIGS = []
 for nurses in [1, 2, 3]:
-    for bays in [12, 14, 16, 18, 20]:
-        for physicians in [3, 4, 5, 6]:
+    for bays in [16, 18, 20, 22, 24]:
+        for physicians in [4, 5, 6, 7, 8]:
             CANDIDATE_CONFIGS.append({
                 "triage_nurses": nurses,
                 "treatment_bays": bays,
