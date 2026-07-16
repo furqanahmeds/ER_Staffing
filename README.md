@@ -84,6 +84,20 @@ over-provisioned relative to demand, suggesting a reallocation
 opportunity to explore in the trade-space phase rather than simply
 adding headcount everywhere.
 
+## Surge Test (Day 8) — REQ-4
+Baseline staffing (2 nurses, 16 bays, 4 physicians) was re-run at +20%
+demand to test REQ-4.
+
+| Requirement | Baseline | +20% Surge |
+|---|---|---|
+| REQ-1: Triage within 10 min | ✅ 100% | ✅ 100% |
+| REQ-2: Acuity 1 within 20 min | ❌ 69.8% | ❌ 75.3% |
+| REQ-2: Acuity 2 within 40 min | ❌ 69.4% | ❌ 69.1% |
+| REQ-2: Acuity 3 within 75 min | ❌ 13.7% | ❌ 0.0% |
+| REQ-2: Acuity 4 within 150 min | ⚠️ 100%* | ⚠️ fully censored* |
+| REQ-3: No wait over 4 hrs | ❌ 38.6% exceeded | ❌ 37.5% exceeded |
+|
+
 ## Requirements
 - **REQ-1:** 90% of patients triaged within 10 minutes of arrival.
 - **REQ-2 (acuity-tiered treatment SLA):** 90% of patients seen by a
