@@ -245,7 +245,7 @@ every requirement, not the most aggressive one.
 
 ## Repository
 
-Code, data, and full diagnostic trail: [add your GitHub repo link]
+Code, data, and full diagnostic trail: https://github.com/furqanahmeds/ER_Staffing
 
 Key scripts: `src/build_acuity_mapping.py`, `src/diagnose_los.py`,
 `src/calibrate_nhamcs.py`, `src/finalize_arrival_mix.py`,
