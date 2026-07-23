@@ -1,27 +1,24 @@
 """
-Day 5 (final): Arrival rate decision.
+Sets the arrival rate the simulation uses.
 
-FINDING:
-Synthea's 5,000-patient population, even restricted to the most recent
-year, produces only ~2.24 arrivals/day -- unusably low, because Synthea
-generates each patient's full life history and 5,000 patients is a small
-population base relative to a real hospital's ED catchment area.
+Ran into a problem here: Synthea's 5,000-patient population, even
+limited to the most recent year of encounters, only works out to about
+2.24 arrivals/day. Synthea generates each patient's entire life history,
+so 5,000 patients spread across decades ends up being way too small a
+base to produce a realistic single-ED volume.
 
-DECISION:
-Same pattern as the Day 3 acuity-mix decision -- use an external,
-documented benchmark for the volume Synthea can't reliably provide:
+Same fix as the acuity-mix issue -- pull the volume from an external
+benchmark instead of trying to force Synthea to produce it:
 
-  - Target arrival rate: 150 patients/day, representing a mid-size ED.
-    Grounded in the national ED visit rate of 47 visits per 100 people/year
-    (NHAMCS 2022 national summary), scaled to a mid-size hospital
-    catchment population.
-  - Synthea's hour-of-day distribution is retained as-is -- this shape
-    (evening peaks, midday bump) is a real, usable pattern independent
-    of the population-size problem that affects the absolute rate.
+  - Target rate: 150 patients/day, roughly a mid-size ED. Based this on
+    the national ED visit rate (47 visits per 100 people/year, NHAMCS
+    2022) scaled to a mid-size hospital's catchment population.
+  - Kept Synthea's hour-of-day shape as-is, since that part (evening
+    peaks, midday bump) looks realistic and isn't affected by the
+    population-size problem -- that's specific to the absolute count.
 
-This is a documented scope decision: the simulation represents a
-mid-size ED scenario, not a specific real hospital's actual volume.
-State this plainly in the write-up's data caveats section.
+So to be clear: this represents a plausible mid-size ED, not the actual
+volume of any real hospital. That's a scope choice, not a hidden gap.
 """
 
 import pandas as pd
@@ -41,9 +38,9 @@ TARGET_ARRIVALS_PER_DAY = 150
 arrival_config = {
     "avg_arrivals_per_day": TARGET_ARRIVALS_PER_DAY,
     "hourly_fraction": {str(h): round(hourly_fraction.get(h, 0), 4) for h in range(24)},
-    "source": "Target volume (150/day) is a documented assumption representing "
-              "a mid-size ED, grounded in NHAMCS 2022 national ED visit rate "
-              "(47 per 100 people/year). Synthea's population was too small "
+    "source": "Target volume (150/day) represents a mid-size ED, based on the "
+              "NHAMCS 2022 national ED visit rate (47 per 100 people/year). "
+              "Synthea's population was too small "
               "(5000 patients, ~2.24 recent-year arrivals/day) to provide a "
               "realistic absolute rate directly. Hourly distribution shape "
               "is retained from Synthea as it remains valid independent of "

@@ -1,3 +1,7 @@
+# My first acuity mapping was defaulting way too many encounters to
+# level 3 -- this digs into why, by checking how many REASONDESCRIPTION
+# values actually matched a keyword vs. fell through to the default.
+
 import pandas as pd
 
 ed = pd.read_csv("data/encounters.csv")

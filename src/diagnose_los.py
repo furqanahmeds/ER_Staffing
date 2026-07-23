@@ -1,3 +1,8 @@
+# Something looked off with the length-of-stay numbers coming out of
+# Synthea (acuity 2 had a mean LOS over a day, but the median was
+# nowhere close) -- this pulls apart the distribution to see what's
+# driving it.
+
 import pandas as pd
 
 ed = pd.read_csv("data/ed_encounters_with_acuity.csv")

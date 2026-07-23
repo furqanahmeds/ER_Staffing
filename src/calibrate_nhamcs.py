@@ -1,22 +1,19 @@
 """
-Day 3: NHAMCS Calibration
+Calibrates the model against NHAMCS national ED benchmarks.
 
-Purpose:
-1. Compare Synthea's derived acuity-level mix against published NHAMCS
-   national benchmarks (validation check).
-2. Derive lognormal distribution parameters for wait time and treatment
-   time by acuity level, anchored to NHAMCS median values, since Synthea's
-   own LOS field is contaminated by inpatient admission time (see Day 2
-   diagnostic finding).
+Two things happening here:
+1. Checking Synthea's derived acuity mix against NHAMCS's published
+   national numbers, as a sanity check.
+2. Building lognormal wait-time and treatment-time distributions by
+   acuity level, anchored to NHAMCS medians -- needed because Synthea's
+   own length-of-stay field turned out to be contaminated by inpatient
+   admission time (see diagnose_los.py).
 
-IMPORTANT MODELING ASSUMPTION:
-NHAMCS publishes MEDIAN wait/treatment times by triage level, but not
-full distribution shapes in the publicly available summary tables used
-here. To build a SimPy-usable distribution, we assume a lognormal shape
-(standard for right-skewed service-time data in queuing literature) and
-choose a dispersion parameter (sigma) representative of typical ED
-variability. This is a documented assumption, not a directly observed
-NHAMCS statistic -- flag this explicitly in the write-up.
+One thing to be upfront about: NHAMCS only publishes median wait/treatment
+times by triage level, not the full distribution shape. I'm assuming a
+lognormal (the standard choice for right-skewed service-time data) and
+picking a sigma that felt representative of typical ED variability --
+that sigma is an estimate on my part, not something NHAMCS reports directly.
 
 Sources:
 - CDC NCHS QuickStats, NHAMCS 2010-2011 (median wait/treatment by triage level)

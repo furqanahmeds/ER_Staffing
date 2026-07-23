@@ -1,13 +1,13 @@
 """
-Day 5-6: Complete SimPy model -- entities, resources, arrival process,
-and a baseline simulation run.
+The core SimPy model -- entities, resources, arrival process, and the
+baseline simulation run.
 
-Structure matches the system architecture diagram:
+Structure follows the system architecture diagram:
   Patient arrivals -> Triage -> Treatment bay -> Physician -> Disposition
 
-Data inputs (all derived/calibrated in Days 1-5):
-  data/arrival_mix.json              -- acuity mix (NHAMCS-derived)
-  data/arrival_rate.json             -- daily volume + hourly shape
+Reads three calibrated inputs built in earlier scripts:
+  data/arrival_mix.json                -- acuity mix (NHAMCS-derived)
+  data/arrival_rate.json               -- daily volume + hourly shape
   data/service_time_distributions.json -- wait/treatment lognormal params
 """
 
@@ -42,13 +42,13 @@ STAFFING = {
     "physicians": 4,
 }
 
-# Physician "contact time" is a separate, shorter duration than full bay
-# occupancy -- a physician assesses/directs care, then the patient
-# continues occupying the bay for nursing care, tests, and monitoring
-# while the physician moves to the next patient. This is a documented
-# modeling assumption: NHAMCS's published "treatment time" reflects
-# total ED length of stay, not exclusive physician-contact time, and the
-# ratio here is estimated rather than directly observed in NHAMCS data.
+# Physician "contact time" is shorter than the full bay occupancy -- a
+# physician assesses/directs care, then the patient stays in the bay
+# for nursing care, tests, and monitoring while the physician moves on
+# to the next patient. Without this split, physicians looked far more
+# overloaded than they'd realistically be, since NHAMCS's "treatment
+# time" is really total ED length of stay, not just doctor-facing time.
+# The 20% split below is my own estimate, not something NHAMCS reports.
 PHYSICIAN_CONTACT_FRACTION = 0.2  # physician holds ~20% of total treatment time
 
 SIM_DURATION_MIN = 60 * 24 * 7  # simulate one full week

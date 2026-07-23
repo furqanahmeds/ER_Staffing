@@ -1,10 +1,11 @@
 """
-Day 7: Resource utilization tracking -- identifies which resource
-(triage nurse, treatment bay, physician) is the true binding constraint.
+Tracks resource utilization to figure out which resource -- triage
+nurse, treatment bay, or physician -- is the actual bottleneck rather
+than just guessing from wait times alone.
 
-Adds simple busy-time tracking to the existing model without changing
-patient flow logic. Run this instead of simpy_model_skeleton.py's main
-block to get utilization alongside the same baseline results.
+Same model as simpy_model_skeleton.py, with busy-time tracking added on
+top without touching the patient flow logic. Run this instead of that
+file's main block to get utilization numbers alongside the baseline results.
 """
 
 import simpy

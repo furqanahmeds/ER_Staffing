@@ -1,7 +1,8 @@
 """
-Day 8: REQ-4 surge test -- runs the baseline staffing configuration at
-+20% demand above normal and checks whether REQ-1 through REQ-3 still
-hold. This is the robustness verification step.
+Surge test for REQ-4 -- reruns the baseline staffing configuration at
++20% demand and checks whether REQ-1 through REQ-3 still hold. This is
+the robustness check: does the system have any slack, or is it already
+maxed out?
 """
 
 import simpy

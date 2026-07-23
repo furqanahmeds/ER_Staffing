@@ -1,10 +1,9 @@
 """
-Day 3 (final): Arrival mix decision for the SimPy model.
+Locks in the acuity mix the simulation actually uses for arrivals.
 
-FINDING:
-Synthea's keyword-derived acuity mix, even after expanding keyword
-coverage (see build_acuity_mapping.py v2), diverges meaningfully from
-NHAMCS national benchmarks:
+Even after tightening up the keyword mapping (build_acuity_mapping.py
+v2), Synthea's acuity distribution still didn't line up with NHAMCS's
+national numbers:
 
     Acuity Level | Synthea (v2) | NHAMCS Target | Diff
     1            | 2.8%         | 15.0%         | -12.2
@@ -12,20 +11,15 @@ NHAMCS national benchmarks:
     3            | 59.4%        | 42.5%         | +16.9
     4            | 11.5%        | 15.5%         | -4.0
 
-DECISION:
-Rather than continue tuning keyword lists to force Synthea's mix toward
-NHAMCS's numbers (which would risk overfitting the mapping to a target
-rather than reflecting genuine clinical judgment), this project uses:
+I could keep tweaking keywords to chase these numbers, but at some
+point that stops being validation and starts being curve-fitting to a
+target. So instead:
 
-  - NHAMCS national percentages for the ARRIVAL MIX (acuity distribution
-    of incoming patients) in the SimPy simulation, since this is an
-    externally validated real-world benchmark.
-  - Synthea for arrival TIMING patterns (hour-of-day volume shape) and
-    as the source that validated the service-time distribution
-    assumptions produce plausible results.
-
-This is a documented modeling decision, not a data-quality workaround --
-it should be stated plainly in the project write-up's V&V section.
+  - Arrivals in the simulation use NHAMCS's national acuity percentages
+    directly -- it's the externally validated number.
+  - Synthea still earns its keep for arrival timing (the hour-of-day
+    shape) and as the sanity check that made the service-time
+    assumptions look reasonable in the first place.
 """
 
 import json

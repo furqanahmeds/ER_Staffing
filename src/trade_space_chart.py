@@ -1,10 +1,8 @@
 """
-Day 10-12: Trade-space visualization.
-
-Reads data/trade_space_results.csv (produced by trade_space_search.py)
-and produces the core trade-space chart: staffing cost vs. p90 wait
-time, with pass/fail on all requirements marked. This is the chart
-that ties the trade-space study together for the write-up.
+Builds the trade-space chart from trade_space_search.py's output:
+staffing cost vs. 90th-percentile wait time, with pass/fail on
+requirements marked. This is the plot that ties the whole trade-space
+study together.
 """
 
 import pandas as pd

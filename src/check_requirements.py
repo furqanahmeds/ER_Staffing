@@ -1,11 +1,12 @@
 """
-Day 7: Check baseline simulation results against formal requirements.
+Checks the baseline simulation output against the project's formal
+requirements.
 
 REQ-1: 90% of patients triaged within 10 min of arrival
 REQ-2: Acuity-tiered treatment SLA (90% seen within target, by level)
 REQ-3: No patient waits more than 240 min (4 hrs) for treatment, any acuity
-REQ-4: System maintains REQ-1-3 under +20% demand surge (checked separately,
-       requires a second simulation run -- see stress_test.py, not yet built)
+REQ-4: System holds REQ-1-3 under a +20% demand surge -- tested separately
+       in stress_test.py since it needs its own simulation run
 """
 
 import pandas as pd
@@ -20,9 +21,8 @@ REQ3_CEILING_MIN = 240
 
 print("=== REQ-1: 90% triaged within 10 min ===")
 steady["triage_duration_min"] = steady["triage_start"].sub(steady["arrival_time"])
-# Note: triage duration itself isn't in current CSV columns explicitly as
-# "time to START triage" -- using triage_start - arrival_time as the
-# wait-to-begin-triage metric, which is what REQ-1 is actually about.
+# Using triage_start - arrival_time as the wait-to-begin-triage metric --
+# that's what REQ-1 is actually measuring, not triage duration itself.
 triage_wait = steady["triage_start"] - steady["arrival_time"]
 pct_within_10 = (triage_wait <= 10).mean() * 100
 print(f"% triaged within 10 min: {pct_within_10:.1f}%  "

@@ -1,18 +1,17 @@
 """
-Days 10-12: Trade-space exploration.
+Trade-space search across staffing configurations.
 
-Searches staffing configurations (varying triage nurses, treatment bays,
-and physicians together) and evaluates each against REQ-1 through REQ-3,
-plus a weighted staffing cost. This is a trade-space exploration, not an
-"optimization" -- there is rarely one dominant configuration; the goal is
-to characterize the cost/performance frontier and make a documented,
-defensible recommendation.
+Sweeps triage nurses, treatment bays, and physicians together, and
+checks each combination against REQ-1 through REQ-3 plus a weighted
+staffing cost. Calling this a "trade-space search" rather than an
+optimization on purpose -- there's rarely one dominant answer here, the
+point is to map out the cost/performance frontier and pick a
+defensible recommendation off it.
 
-COST WEIGHTS (documented assumption, not real salary data):
-Physicians are weighted heaviest (highest labor cost per hour in a real
-ED), nurses moderate, bays lowest (closer to a capital/space cost than
-an hourly labor cost). Relative ratios only -- not calibrated to any
-specific real wage data.
+Cost weights: physicians weighted heaviest (highest labor cost per hour
+in a real ED), nurses moderate, bays lowest (closer to a capital/space
+cost than an hourly labor cost). These are relative ratios I chose to
+be directionally realistic -- not pulled from actual wage data.
 """
 
 import simpy

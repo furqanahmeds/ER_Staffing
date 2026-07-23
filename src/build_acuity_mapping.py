@@ -1,17 +1,16 @@
 """
-Filter Synthea encounters.csv for emergency department visits and assign
-a simplified acuity level (1 = most critical, 5 = least urgent) based on
-the encounter's REASONDESCRIPTION.
+Filters Synthea's encounters.csv down to ED visits and assigns each one
+a simplified acuity level (1 = most critical, 4 = least urgent) based on
+keywords in REASONDESCRIPTION.
 
-v2: expanded keyword coverage based on diagnostic review of actual
-REASONDESCRIPTION values that fell through to the default bucket in v1
-(see diagnose_acuity_mapping.py output). Roughly 60% of encounters were
-previously defaulting to level 3 due to missing keyword coverage --
-this version explicitly maps the specific conditions found in the data.
+Second pass at this mapping -- my first attempt defaulted about 60% of
+encounters to level 3 because the keyword list was too thin. I dug into
+which REASONDESCRIPTION values were falling through unmatched
+(diagnose_acuity_mapping.py) and expanded the lists to cover them.
 
-This mapping remains a modeling assumption -- document it explicitly in
-your write-up. Real EDs use a formal Emergency Severity Index (ESI)
-protocol based on vital signs and resource needs, not diagnosis text alone.
+Worth being upfront that this is still a rough stand-in for a real
+triage protocol. Actual EDs use the Emergency Severity Index, which
+factors in vitals and resource needs, not just diagnosis text.
 """
 
 import pandas as pd
@@ -61,12 +60,12 @@ ACUITY_KEYWORDS = {
 
 def assign_acuity(reason):
     if pd.isna(reason):
-        return 3  # documented assumption: unspecified reason -> moderate
+        return 3  # no reason given -- defaulting to moderate acuity
     reason_lower = str(reason).lower()
     for level, keywords in ACUITY_KEYWORDS.items():
         if any(kw in reason_lower for kw in keywords):
             return level
-    return 3  # documented assumption: no keyword match -> moderate
+    return 3  # nothing matched -- defaulting to moderate acuity
 
 ed["ACUITY"] = ed["REASONDESCRIPTION"].apply(assign_acuity)
 
